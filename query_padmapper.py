@@ -65,7 +65,7 @@ def direct_fetch(cmd_prefix, minLat, minLng, maxLat, maxLng, it):
   result = result["pins"]
   
   if len(result) > 99:
-    if it > 50:
+    if it > 20:  # ~20m per side, single building footprint
       # we've already tried to zoom in too far here, and now we're stuck.
       import pprint
       pprint.pprint(result)
