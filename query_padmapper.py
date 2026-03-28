@@ -7,11 +7,11 @@ import subprocess
 import shlex
 import time
 
-# boston
-MIN_LAT=42.255594
-MAX_LAT=42.4351936
-MIN_LON=-71.1828231
-MAX_LON=-70.975800
+# boston / south shore
+MIN_LAT=41.8682
+MAX_LAT=42.45604
+MIN_LON=-71.52867
+MAX_LON=-70.7894
 
 # baltimore
 #MAX_LAT=39.388979
@@ -33,6 +33,8 @@ MAX_LON=-70.975800
 
 class AreaTooLarge(Exception):
   pass
+
+_stats = {'calls': 0, 'listings': 0}
 
 def direct_fetch(cmd_prefix, minLat, minLng, maxLat, maxLng, it):
   args = shlex.split(cmd_prefix)
@@ -63,7 +65,11 @@ def direct_fetch(cmd_prefix, minLat, minLng, maxLat, maxLng, it):
     raise Exception("bad response")
 
   result = result["pins"]
-  
+
+  _stats['calls'] += 1
+  _stats['listings'] += len(result)
+  print('  [call #%d: +%d listings, %d total so far]' % (_stats['calls'], len(result), _stats['listings']))
+
   if len(result) > 99:
     if it > 20:  # ~20m per side, single building footprint
       # we've already tried to zoom in too far here, and now we're stuck.
