@@ -99,16 +99,13 @@ def fetch(cmd_prefix, minLat, minLng, maxLat, maxLng, it=0):
       return (fetchHelper(minLat, minLng, maxLat, intermediate(minLng, maxLng)) +
               fetchHelper(minLat, intermediate(minLng, maxLng), maxLat, maxLng))
 
-def download(fname):
-  print("Visit:")
-  print('https://www.padmapper.com/apartments/belmont-ma/belmont-hill?box=-71.1993028524,42.396054506,-71.1761285665,42.4262507215&property-categories=apartment')
-  print("Inspect the networking, find a pins request, copy request as curl and paste here.")
-  inp = input("> ")
-  while inp.endswith("\\"):
-    inp = inp[:-2] + " "
-    inp += input("> ")
+def download(fname, curl_file):
+  print('reading curl from %s' % curl_file)
+  with open(curl_file) as f:
+    inp = f.read()
+  inp = " ".join(l.rstrip().rstrip("\\") for l in inp.splitlines() if l.strip())
 
-  print ("%r" % inp)
+  print('got input (%d chars)' % len(inp))
 
   if "--data-raw" not in inp:
     raise Exception("Something looks wrong.  Was that the curl version of a pins request?")
@@ -138,9 +135,12 @@ def process(fname_in, fname_out):
     for rent, bedrooms, apt_id, lon, lat in processed:
       outf.write("%s %s %s %s %s\n" % (rent, bedrooms, apt_id, lon, lat))
 
-def start(fname_download, fname_processed):
+def start(curl_file, fname_download, fname_processed):
+  if not os.path.exists(curl_file):
+    raise Exception("%s not found. Save your curl command to a text file first." % curl_file)
+
   if not os.path.exists(fname_download):
-    download(fname_download)
+    download(fname_download, curl_file)
   if not os.path.exists(fname_download):
     raise Exception("%s still missing" % fname_download)
 
